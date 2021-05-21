@@ -7,7 +7,13 @@ const reviewSchema = new Schema({
     author: {
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    createDate: String
 });
+
+reviewSchema.virtual('daysAgo').get(function () {
+    const differenceInTime = Date.now() - this.createDate;
+    return Math.floor(differenceInTime / (1000 * 3600 * 24));
+})
 
 module.exports = mongoose.model('Review', reviewSchema)

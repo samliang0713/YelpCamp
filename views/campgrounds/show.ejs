@@ -57,7 +57,8 @@
                             </form>
                         </div>
                         <% } %>
-                            <div class="card-footer text-muted">2 days ago</div>
+                            <div class="card-footer text-muted">Created on: <%=cg.createDate%>
+                            </div>
 
                 </div>
 
@@ -118,6 +119,20 @@
                                     <% }%>
 
                             </div>
+                            <% const daysAgo=Math.floor((Date.now() - review.createDate) / (1000 * 3600 * 24) ) %>
+                                <% if(daysAgo <=1) { %>
+                                    <div class="card-footer text-muted">
+                                        <%= daysAgo%> day ago
+                                    </div>
+                                    <% } else if(daysAgo < 30) { %>
+                                        <div class="card-footer text-muted">
+                                            <%= daysAgo %> days ago
+                                        </div>
+                                        <% } else { %>
+                                            <div class="card-footer text-muted">
+                                                Reviewed on <%=review.createDate%>
+                                            </div>
+                                            <% } %>
                         </div>
                         <% }%>
         </div>
