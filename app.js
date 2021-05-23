@@ -21,8 +21,6 @@ const MongoDBStore = require("connect-mongo");
 
 const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp'
 
-const db = mongoose.connection;
-
 mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -30,11 +28,12 @@ mongoose.connect(dbUrl, {
     useFindAndModify: false
 })
 
+const db = mongoose.connection;
+
 db.on("error", console.error.bind(console, "connection error:"))
 db.once("open", () => {
-    console.log("database connected");
+    console.log("Database connected");
 })
-
 
 const app = express();
 
@@ -42,26 +41,26 @@ app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressMongoSanitize());
 
 
-const store = MongoDBStore.create({
+
+const secret = process.env.SECRET || "thisshouldbeabettersecret!"
+
+const store = new MongoDBStore({
     mongoUrl: dbUrl,
     touchAfter: 24 * 60 * 60,
     cyrpto: {
-        secret: "turtle"
+        secret
     }
 });
 
 store.on("error", function (e) {
     console.log("session store error", e)
 })
-
-
-const secret = process.env.SECRET || "thisshouldbeabettersecret!"
 
 const sessionConfig = {
     store,
@@ -75,8 +74,6 @@ const sessionConfig = {
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
-
-
 
 app.use(session(sessionConfig));
 app.use(flash());
@@ -110,6 +107,7 @@ const connectSrcUrls = [
 ];
 
 const fontSrcUrls = [];
+
 app.use(
     helmet.contentSecurityPolicy({
         directives: {
@@ -150,10 +148,9 @@ app.use((req, res, next) => {
 app.use('/', usersRoutes);
 app.use('/campgrounds', campgroundsRoutes)
 app.use('/campgrounds/:id/reviews', reviewsRoutes)
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.get('/', (req, res) => {
-    console.log(req.query);
     res.render('home');
 })
 
